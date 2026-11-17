@@ -363,4 +363,1128 @@
     }
 
     .chart-legend {
-      display: flex
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot-teal {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .line-amber {
+      width: 14px;
+      height: 0;
+      border-top: 2px dashed var(--accent);
+    }
+
+    /* История */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #f1f5f9;
+    }
+
+    .h-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .h-date {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .h-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .h-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .h-weight {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .h-diff {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .diff-down {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .diff-up {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .diff-zero {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 16px;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 18px 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* Таблица замеров тела */
+    .measure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table.m-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    table.m-table th,
+    table.m-table td {
+      padding: 9px 8px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+      white-space: nowrap;
+    }
+
+    table.m-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #334155;
+      font-size: 11px;
+    }
+
+    table.m-table td:first-child,
+    table.m-table th:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      background: #fff;
+      font-weight: 700;
+      color: #0f172a;
+      z-index: 1;
+      border-right: 1px solid #f1f5f9;
+    }
+
+    table.m-table th:first-child {
+      background: #f8fafc;
+    }
+
+    .metric-select {
+      width: auto;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      background: var(--violet-light);
+      color: var(--violet);
+      border: none;
+    }
+
+    .demo-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .demo-clear-btn {
+      background: #fff;
+      border: 1px solid #f59e0b;
+      color: #b45309;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Шапка -->
+    <div class="header">
+      <div class="title-wrap">
+        <div class="logo-badge">⚖️</div>
+        <div>
+          <h1>Мой вес и замеры</h1>
+          <p>Контроль веса и объёмов тела</p>
+        </div>
+      </div>
+      <div class="backup-btns">
+        <button class="btn-mini" onclick="exportBackup()">⬇️ Копия</button>
+        <button class="btn-mini" onclick="document.getElementById('importFile').click()">⬆️ Импорт</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+      </div>
+    </div>
+
+    <!-- Баннер демо-данных -->
+    <div class="demo-banner" id="demoBanner" style="display:none;">
+      <span>Показан пример заполнения</span>
+      <button class="demo-clear-btn" onclick="clearAllData()">🧹 Очистить и начать с нуля</button>
+    </div>
+
+    <!-- Переключатель разделов -->
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchMainTab('weight', this)">⚖️ Утренний вес</button>
+      <button class="main-tab" onclick="switchMainTab('body', this)">📏 Замеры тела</button>
+    </div>
+
+    <!-- ==================== ВКЛАДКА 1: ВЕС ==================== -->
+    <div id="tab-weight" class="tab-pane active">
+      <!-- Карточка цели -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🎯 Моя цель</h2>
+          <button class="edit-goal-btn" onclick="toggleGoalForm()">Изменить цель</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Начальный</div>
+            <div class="stat-val" id="startWeightDisp">—</div>
+          </div>
+          <div class="stat-box highlight">
+            <div class="stat-label">Текущий</div>
+            <div class="stat-val" id="currentWeightDisp">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Желаемый</div>
+            <div class="stat-val" id="goalWeightDisp">—</div>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-info">
+            <span id="deltaText">Укажите начальный и желаемый вес</span>
+            <span id="percentText">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+
+        <!-- Форма редактирования цели -->
+        <div class="goal-form" id="goalForm">
+          <div class="row-2">
+            <div>
+              <label>Начальный вес (кг)</label>
+              <input type="number" step="0.1" id="inputStartWeight" placeholder="77.5" inputmode="decimal">
+            </div>
+            <div>
+              <label>Желаемый вес (кг)</label>
+              <input type="number" step="0.1" id="inputGoalWeight" placeholder="68.0" inputmode="decimal">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px; padding:10px;" onclick="saveGoals()">Сохранить цель</button>
+        </div>
+      </div>
+
+      <!-- Утренний ввод веса -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">☀️ Записать утренний вес</h2>
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Дата</label>
+            <input type="date" id="entryDate">
+          </div>
+          <div>
+            <label>Вес (кг)</label>
+            <input type="number" step="0.1" id="entryWeight" placeholder="76.8" inputmode="decimal">
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label>Заметка (необязательно)</label>
+          <input type="text" id="entryNote" placeholder="Например: после прогулки на дорожке">
+        </div>
+        <button class="btn-primary" onclick="addWeightEntry()">+ Сохранить замер веса</button>
+      </div>
+
+      <!-- График веса -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📈 График динамики</h2>
+          <div class="period-tabs">
+            <button class="period-tab active" onclick="setPeriod(14, this)">14 дн</button>
+            <button class="period-tab" onclick="setPeriod(30, this)">30 дн</button>
+            <button class="period-tab" onclick="setPeriod(0, this)">Всё</button>
+          </div>
+        </div>
+        <div class="chart-box">
+          <canvas id="weightChart"></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="dot-teal"></span> Ваш вес</div>
+          <div class="legend-item"><span class="line-amber"></span> Желаемый вес</div>
+        </div>
+      </div>
+
+      <!-- История веса -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🗓️ История взвешиваний</h2>
+          <span style="font-size:12px; color:var(--muted)" id="countDisp">0 записей</span>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- ==================== ВКЛАДКА 2: ЗАМЕРЫ ТЕЛА ==================== -->
+    <div id="tab-body" class="tab-pane">
+      <!-- Сводка по объёмам -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">✨ Итог по объёмам (см)</h2>
+        </div>
+        <div class="stats-grid" style="margin-bottom:0;">
+          <div class="stat-box">
+            <div class="stat-label">Талия (изм.)</div>
+            <div class="stat-val" id="waistDeltaDisp">—</div>
+          </div>
+          <div class="stat-box violet-hl">
+            <div class="stat-label">Всего ушло</div>
+            <div class="stat-val" id="totalCmDeltaDisp">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Бёдра (изм.)</div>
+            <div class="stat-val" id="hipsDeltaDisp">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Форма ввода замеров тела -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📏 Внести замеры тела (см)</h2>
+        </div>
+        <div>
+          <label>Дата замера</label>
+          <input type="date" id="bodyDate">
+        </div>
+        <div class="measure-grid">
+          <div>
+            <label>Объём груди</label>
+            <input type="number" step="0.5" id="m_chest" placeholder="98" inputmode="decimal">
+          </div>
+          <div>
+            <label>Объём талии</label>
+            <input type="number" step="0.5" id="m_waist" placeholder="82" inputmode="decimal">
+          </div>
+          <div>
+            <label>Объём живота</label>
+            <input type="number" step="0.5" id="m_abdomen" placeholder="90" inputmode="decimal">
+          </div>
+          <div>
+            <label>Объём бёдер</label>
+            <input type="number" step="0.5" id="m_hips" placeholder="104" inputmode="decimal">
+          </div>
+          <div>
+            <label>Левая рука</label>
+            <input type="number" step="0.5" id="m_armL" placeholder="31" inputmode="decimal">
+          </div>
+          <div>
+            <label>Правая рука</label>
+            <input type="number" step="0.5" id="m_armR" placeholder="31.5" inputmode="decimal">
+          </div>
+          <div>
+            <label>Левое бедро</label>
+            <input type="number" step="0.5" id="m_thighL" placeholder="58" inputmode="decimal">
+          </div>
+          <div>
+            <label>Правое бедро</label>
+            <input type="number" step="0.5" id="m_thighR" placeholder="58.5" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn-primary btn-violet" onclick="addBodyEntry()">+ Сохранить замеры тела</button>
+      </div>
+
+      <!-- График по выбранному параметру -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 График объёмов</h2>
+          <select id="bodyMetricSelect" class="metric-select" onchange="drawBodyChart()">
+            <option value="waist">Объём талии</option>
+            <option value="abdomen">Объём живота</option>
+            <option value="hips">Объём бёдер</option>
+            <option value="chest">Объём груди</option>
+            <option value="armL">Левая рука</option>
+            <option value="armR">Правая рука</option>
+            <option value="thighL">Левое бедро</option>
+            <option value="thighR">Правое бедро</option>
+          </select>
+        </div>
+        <div class="chart-box">
+          <canvas id="bodyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Сравнительная таблица замеров -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📋 Таблица замеров по датам</h2>
+        </div>
+        <div id="bodyTableWrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'weight_and_body_tracker_v2';
+    const BODY_FIELDS = [
+      { key: 'chest', label: 'Объём груди' },
+      { key: 'waist', label: 'Объём талии' },
+      { key: 'abdomen', label: 'Объём живота' },
+      { key: 'hips', label: 'Объём бёдер' },
+      { key: 'armL', label: 'Левая рука' },
+      { key: 'armR', label: 'Правая рука' },
+      { key: 'thighL', label: 'Левое бедро' },
+      { key: 'thighR', label: 'Правое бедро' }
+    ];
+
+    let state = {
+      isDemo: false,
+      startWeight: null,
+      goalWeight: null,
+      entries: [],
+      bodyEntries: []
+    };
+    let currentPeriod = 14;
+
+    function getTodayStr(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const offset = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - offset).toISOString().split('T')[0];
+    }
+
+    function init() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+          if (!Array.isArray(state.bodyEntries)) state.bodyEntries = [];
+        } catch (e) {}
+      } else {
+        // Демо-данные для наглядности при первом открытии
+        state = {
+          isDemo: true,
+          startWeight: 77.5,
+          goalWeight: 70.0,
+          entries: [
+            { date: getTodayStr(-6), weight: 77.5, note: 'Начало' },
+            { date: getTodayStr(-5), weight: 77.2, note: '' },
+            { date: getTodayStr(-4), weight: 77.3, note: '' },
+            { date: getTodayStr(-3), weight: 76.9, note: '' },
+            { date: getTodayStr(-2), weight: 76.6, note: '' },
+            { date: getTodayStr(-1), weight: 76.4, note: '' },
+            { date: getTodayStr(0), weight: 76.1, note: 'Утренний замер' }
+          ],
+          bodyEntries: [
+            { date: getTodayStr(-30), chest: 102, waist: 86, abdomen: 94, hips: 106, armL: 32, armR: 32.5, thighL: 60, thighR: 60.5 },
+            { date: getTodayStr(0), chest: 100, waist: 83, abdomen: 90.5, hips: 104, armL: 31, armR: 31.5, thighL: 58.5, thighR: 59 }
+          ]
+        };
+        saveState();
+      }
+
+      document.getElementById('entryDate').value = getTodayStr();
+      document.getElementById('bodyDate').value = getTodayStr();
+      renderAll();
+
+      window.addEventListener('resize', () => {
+        drawWeightChart();
+        drawBodyChart();
+      });
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      document.getElementById('demoBanner').style.display = state.isDemo ? 'flex' : 'none';
+    }
+
+    function clearAllData() {
+      if (!confirm('Очистить пример и начать вести свои записи с нуля?')) return;
+      state = {
+        isDemo: false,
+        startWeight: null,
+        goalWeight: null,
+        entries: [],
+        bodyEntries: []
+      };
+      saveState();
+      document.getElementById('goalForm').classList.add('open');
+      renderAll();
+    }
+
+    function switchMainTab(tabName, btn) {
+      document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      if (tabName === 'weight') drawWeightChart();
+      if (tabName === 'body') drawBodyChart();
+    }
+
+    /* ==================== ЛОГИКА ВЕСА ==================== */
+    function toggleGoalForm() {
+      const form = document.getElementById('goalForm');
+      form.classList.toggle('open');
+      if (form.classList.contains('open')) {
+        document.getElementById('inputStartWeight').value = state.startWeight || '';
+        document.getElementById('inputGoalWeight').value = state.goalWeight || '';
+      }
+    }
+
+    function saveGoals() {
+      const s = parseFloat(document.getElementById('inputStartWeight').value.replace(',', '.'));
+      const g = parseFloat(document.getElementById('inputGoalWeight').value.replace(',', '.'));
+      if (isNaN(s) || isNaN(g) || s <= 0 || g <= 0) {
+        alert('Введите корректный начальный и желаемый вес.');
+        return;
+      }
+      state.isDemo = false;
+      state.startWeight = Math.round(s * 10) / 10;
+      state.goalWeight = Math.round(g * 10) / 10;
+      saveState();
+      document.getElementById('goalForm').classList.remove('open');
+      renderWeight();
+    }
+
+    function addWeightEntry() {
+      const date = document.getElementById('entryDate').value;
+      const wRaw = document.getElementById('entryWeight').value.replace(',', '.');
+      const weight = Math.round(parseFloat(wRaw) * 10) / 10;
+      const note = document.getElementById('entryNote').value.trim();
+
+      if (!date || isNaN(weight) || weight <= 0) {
+        alert('Укажите дату и ваш вес.');
+        return;
+      }
+
+      if (state.isDemo) {
+        state.isDemo = false;
+        state.entries = [];
+        state.bodyEntries = [];
+      }
+
+      if (!state.startWeight) {
+        state.startWeight = weight;
+      }
+
+      const idx = state.entries.findIndex(item => item.date === date);
+      if (idx >= 0) {
+        state.entries[idx] = { date, weight, note };
+      } else {
+        state.entries.push({ date, weight, note });
+      }
+
+      state.entries.sort((a, b) => a.date.localeCompare(b.date));
+      saveState();
+
+      document.getElementById('entryWeight').value = '';
+      document.getElementById('entryNote').value = '';
+      renderAll();
+    }
+
+    function deleteWeightEntry(date) {
+      if (!confirm('Удалить замер веса за ' + formatDateRu(date) + '?')) return;
+      state.entries = state.entries.filter(item => item.date !== date);
+      saveState();
+      renderWeight();
+    }
+
+    function setPeriod(days, btn) {
+      currentPeriod = days;
+      document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      drawWeightChart();
+    }
+
+    function renderWeight() {
+      const latest = state.entries.length ? state.entries[state.entries.length - 1].weight : state.startWeight;
+
+      document.getElementById('startWeightDisp').textContent = state.startWeight ? state.startWeight.toFixed(1) + ' кг' : '—';
+      document.getElementById('currentWeightDisp').textContent = latest ? latest.toFixed(1) + ' кг' : '—';
+      document.getElementById('goalWeightDisp').textContent = state.goalWeight ? state.goalWeight.toFixed(1) + ' кг' : '—';
+
+      if (state.startWeight && state.goalWeight && latest) {
+        const totalDiff = state.startWeight - state.goalWeight;
+        const doneDiff = state.startWeight - latest;
+        const left = Math.max(0, latest - state.goalWeight);
+
+        let pct = 0;
+        if (totalDiff > 0) {
+          pct = Math.max(0, Math.min(100, Math.round((doneDiff / totalDiff) * 100)));
+        } else if (totalDiff < 0) {
+          pct = Math.max(0, Math.min(100, Math.round(((latest - state.startWeight) / (state.goalWeight - state.startWeight)) * 100)));
+        }
+
+        const sign = doneDiff > 0 ? '−' : (doneDiff < 0 ? '+' : '');
+        const absDone = Math.abs(doneDiff).toFixed(1);
+
+        if (totalDiff > 0) {
+          document.getElementById('deltaText').textContent =
+            latest <= state.goalWeight
+              ? '🎉 Цель достигнута!'
+              : `Изменение: ${sign}${absDone} кг • Осталось: ${left.toFixed(1)} кг`;
+        } else {
+          document.getElementById('deltaText').textContent = `Изменение: ${sign}${absDone} кг`;
+        }
+
+        document.getElementById('percentText').textContent = pct + '%';
+        document.getElementById('progressBar').style.width = pct + '%';
+      } else {
+        document.getElementById('deltaText').textContent = 'Нажмите «Изменить цель», чтобы задать старт и цель';
+        document.getElementById('percentText').textContent = '0%';
+        document.getElementById('progressBar').style.width = '0%';
+      }
+
+      const list = document.getElementById('historyList');
+      document.getElementById('countDisp').textContent = `${state.entries.length} зап.`;
+
+      if (!state.entries.length) {
+        list.innerHTML = '<div class="empty-state">Пока нет ни одного взвешивания.<br>Внесите первый утренний вес выше.</div>';
+      } else {
+        const reversed = [...state.entries].reverse();
+        list.innerHTML = reversed.map((item, i) => {
+          const prev = reversed[i + 1];
+          let diffHtml = '';
+          if (prev) {
+            const d = Math.round((item.weight - prev.weight) * 10) / 10;
+            if (d < 0) diffHtml = `<span class="h-diff diff-down">${d.toFixed(1)}</span>`;
+            else if (d > 0) diffHtml = `<span class="h-diff diff-up">+${d.toFixed(1)}</span>`;
+            else diffHtml = `<span class="h-diff diff-zero">0.0</span>`;
+          }
+          return `
+            <div class="history-item">
+              <div class="h-left">
+                <span class="h-date">${formatDateRu(item.date)}</span>
+                ${item.note ? `<span class="h-note">${escapeHtml(item.note)}</span>` : ''}
+              </div>
+              <div class="h-right">
+                ${diffHtml}
+                <span class="h-weight">${item.weight.toFixed(1)} кг</span>
+                <button class="del-btn" onclick="deleteWeightEntry('${item.date}')" title="Удалить">✕</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      drawWeightChart();
+    }
+
+    function drawWeightChart() {
+      const canvas = document.getElementById('weightChart');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      if (rect.width === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      let data = [...state.entries];
+      if (currentPeriod > 0 && data.length > currentPeriod) {
+        data = data.slice(-currentPeriod);
+      }
+
+      if (data.length === 0) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Добавьте первый замер, чтобы увидеть график', W / 2, H / 2);
+        return;
+      }
+
+      const padL = 42, padR = 18, padT = 22, padB = 28;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const weights = data.map(d => d.weight);
+      if (state.goalWeight) weights.push(state.goalWeight);
+
+      let minW = Math.min(...weights);
+      let maxW = Math.max(...weights);
+      if (maxW - minW < 1.5) {
+        minW -= 0.8;
+        maxW += 0.8;
+      } else {
+        const margin = (maxW - minW) * 0.15;
+        minW -= margin;
+        maxW += margin;
+      }
+
+      const getY = val => padT + plotH - ((val - minW) / (maxW - minW)) * plotH;
+      const getX = idx => data.length === 1 ? padL + plotW / 2 : padL + (idx / (data.length - 1)) * plotW;
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'right';
+
+      for (let i = 0; i <= 4; i++) {
+        const val = minW + ((maxW - minW) / 4) * i;
+        const y = getY(val);
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.fillText(val.toFixed(1), padL - 6, y + 4);
+      }
+
+      if (state.goalWeight && state.goalWeight >= minW && state.goalWeight <= maxW) {
+        const gy = getY(state.goalWeight);
+        ctx.save();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(padL, gy);
+        ctx.lineTo(W - padR, gy);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (data.length > 1) {
+        const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+        grad.addColorStop(0, 'rgba(13, 148, 136, 0.25)');
+        grad.addColorStop(1, 'rgba(13, 148, 136, 0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(getX(0), padT + plotH);
+        data.forEach((pt, i) => ctx.lineTo(getX(i), getY(pt.weight)));
+        ctx.lineTo(getX(data.length - 1), padT + plotH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#0d9488';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        data.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(getX(i), getY(pt.weight));
+          else ctx.lineTo(getX(i), getY(pt.weight));
+        });
+        ctx.stroke();
+      }
+
+      const labelStep = Math.ceil(data.length / 5);
+      data.forEach((pt, i) => {
+        const x = getX(i);
+        const y = getY(pt.weight);
+
+        ctx.beginPath();
+        ctx.arc(x, y, data.length > 20 ? 3 : 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#0d9488';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        if (data.length <= 10 || i === data.length - 1 || i === 0) {
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(pt.weight.toFixed(1), x, y - 8);
+        }
+
+        if (i % labelStep === 0 || i === data.length - 1) {
+          ctx.fillStyle = '#64748b';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(formatShortDate(pt.date), x, H - 8);
+        }
+      });
+    }
+
+    /* ==================== ЛОГИКА ЗАМЕРОВ ТЕЛА ==================== */
+    function addBodyEntry() {
+      const date = document.getElementById('bodyDate').value;
+      if (!date) {
+        alert('Укажите дату замера.');
+        return;
+      }
+
+      const record = { date };
+      let hasAny = false;
+
+      BODY_FIELDS.forEach(f => {
+        const raw = document.getElementById('m_' + f.key).value.replace(',', '.');
+        const val = parseFloat(raw);
+        if (!isNaN(val) && val > 0) {
+          record[f.key] = Math.round(val * 10) / 10;
+          hasAny = true;
+        } else {
+          record[f.key] = null;
+        }
+      });
+
+      if (!hasAny) {
+        alert('Заполните хотя бы один объём в сантиметрах.');
+        return;
+      }
+
+      if (state.isDemo) {
+        state.isDemo = false;
+        state.entries = [];
+        state.bodyEntries = [];
+      }
+
+      const idx = state.bodyEntries.findIndex(item => item.date === date);
+      if (idx >= 0) {
+        state.bodyEntries[idx] = record;
+      } else {
+        state.bodyEntries.push(record);
+      }
+
+      state.bodyEntries.sort((a, b) => a.date.localeCompare(b.date));
+      saveState();
+
+      BODY_FIELDS.forEach(f => {
+        document.getElementById('m_' + f.key).value = '';
+      });
+
+      renderAll();
+    }
+
+    function deleteBodyEntry(date) {
+      if (!confirm('Удалить замеры тела за ' + formatDateRu(date) + '?')) return;
+      state.bodyEntries = state.bodyEntries.filter(item => item.date !== date);
+      saveState();
+      renderBody();
+    }
+
+    function renderBody() {
+      const entries = state.bodyEntries;
+
+      // Сводка сверху
+      if (entries.length >= 2) {
+        const first = entries[0];
+        const last = entries[entries.length - 1];
+
+        const formatDelta = (v1, v2) => {
+          if (v1 == null || v2 == null) return '—';
+          const d = Math.round((v2 - v1) * 10) / 10;
+          return (d > 0 ? '+' : '') + d.toFixed(1) + ' см';
+        };
+
+        document.getElementById('waistDeltaDisp').textContent = formatDelta(first.waist, last.waist);
+        document.getElementById('hipsDeltaDisp').textContent = formatDelta(first.hips, last.hips);
+
+        let sumDiff = 0;
+        let compared = 0;
+        BODY_FIELDS.forEach(f => {
+          if (first[f.key] != null && last[f.key] != null) {
+            sumDiff += (last[f.key] - first[f.key]);
+            compared++;
+          }
+        });
+        sumDiff = Math.round(sumDiff * 10) / 10;
+        document.getElementById('totalCmDeltaDisp').textContent =
+          compared > 0 ? ((sumDiff > 0 ? '+' : '') + sumDiff.toFixed(1) + ' см') : '—';
+      } else if (entries.length === 1) {
+        const only = entries[0];
+        document.getElementById('waistDeltaDisp').textContent = only.waist ? only.waist + ' см' : '—';
+        document.getElementById('hipsDeltaDisp').textContent = only.hips ? only.hips + ' см' : '—';
+        document.getElementById('totalCmDeltaDisp').textContent = '1 замер';
+      } else {
+        document.getElementById('waistDeltaDisp').textContent = '—';
+        document.getElementById('hipsDeltaDisp').textContent = '—';
+        document.getElementById('totalCmDeltaDisp').textContent = '—';
+      }
+
+      // Таблица сравнений по датам
+      const wrap = document.getElementById('bodyTableWrap');
+      if (!entries.length) {
+        wrap.innerHTML = '<div class="empty-state">Пока нет ни одного замера тела.<br>Заполните объёмы выше раз в месяц, чтобы видеть динамику.</div>';
+      } else {
+        let html = '<div class="table-scroll"><table class="m-table"><thead><tr><th>Параметр</th>';
+        entries.forEach(e => {
+          html += `<th>${formatShortDate(e.date)}<br><span style="font-weight:400;font-size:10px;color:#64748b">${e.date.slice(0,4)}</span> <button onclick="deleteBodyEntry('${e.date}')" style="border:none;background:none;color:#ef4444;cursor:pointer;padding:0 2px;" title="Удалить">×</button></th>`;
+        });
+        if (entries.length >= 2) {
+          html += '<th>Итог</th>';
+        }
+        html += '</tr></thead><tbody>';
+
+        BODY_FIELDS.forEach(f => {
+          html += `<tr><td>${f.label}</td>`;
+          entries.forEach(e => {
+            html += `<td>${e[f.key] != null ? e[f.key].toFixed(1) : '—'}</td>`;
+          });
+          if (entries.length >= 2) {
+            const firstVal = entries[0][f.key];
+            const lastVal = entries[entries.length - 1][f.key];
+            if (firstVal != null && lastVal != null) {
+              const diff = Math.round((lastVal - firstVal) * 10) / 10;
+              const cls = diff < 0 ? 'diff-down' : (diff > 0 ? 'diff-up' : 'diff-zero');
+              const sign = diff > 0 ? '+' : '';
+              html += `<td><span class="h-diff ${cls}">${sign}${diff.toFixed(1)}</span></td>`;
+            } else {
+              html += '<td>—</td>';
+            }
+          }
+          html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        wrap.innerHTML = html;
+      }
+
+      drawBodyChart();
+    }
+
+    function drawBodyChart() {
+      const canvas = document.getElementById('bodyChart');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      if (rect.width === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const metricKey = document.getElementById('bodyMetricSelect').value;
+      const data = state.bodyEntries
+        .filter(e => e[metricKey] != null)
+        .map(e => ({ date: e.date, val: e[metricKey] }));
+
+      if (data.length === 0) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Нет данных для выбранного параметра', W / 2, H / 2);
+        return;
+      }
+
+      const padL = 42, padR = 22, padT = 24, padB = 28;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const vals = data.map(d => d.val);
+      let minV = Math.min(...vals);
+      let maxV = Math.max(...vals);
+      if (maxV - minV < 2) {
+        minV -= 1.5;
+        maxV += 1.5;
+      } else {
+        const m = (maxV - minV) * 0.15;
+        minV -= m;
+        maxV += m;
+      }
+
+      const getY = v => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
+      const getX = i => data.length === 1 ? padL + plotW / 2 : padL + (i / (data.length - 1)) * plotW;
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'right';
+
+      for (let i = 0; i <= 4; i++) {
+        const v = minV + ((maxV - minV) / 4) * i;
+        const y = getY(v);
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.fillText(v.toFixed(1), padL - 6, y + 4);
+      }
+
+      if (data.length > 1) {
+        const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+        grad.addColorStop(0, 'rgba(124, 58, 237, 0.22)');
+        grad.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+
+        ctx.beginPath();
+        ctx.moveTo(getX(0), padT + plotH);
+        data.forEach((pt, i) => ctx.lineTo(getX(i), getY(pt.val)));
+        ctx.lineTo(getX(data.length - 1), padT + plotH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        data.forEach((pt, i) => {
+          if (i === 0) ctx.moveTo(getX(i), getY(pt.val));
+          else ctx.lineTo(getX(i), getY(pt.val));
+        });
+        ctx.stroke();
+      }
+
+      data.forEach((pt, i) => {
+        const x = getX(i);
+        const y = getY(pt.val);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#7c3aed';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(pt.val.toFixed(1), x, y - 9);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(formatShortDate(pt.date), x, H - 8);
+      });
+    }
+
+    /* ==================== ОБЩИЕ ФУНКЦИИ ==================== */
+    function renderAll() {
+      document.getElementById('demoBanner').style.display = state.isDemo ? 'flex' : 'none';
+      renderWeight();
+      renderBody();
+    }
+
+    function formatDateRu(iso) {
+      const [y, m, d] = iso.split('-');
+      return `${d}.${m}.${y}`;
+    }
+
+    function formatShortDate(iso) {
+      const [, m, d] = iso.split('-');
+      return `${d}.${m}`;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `weight_body_backup_${getTodayStr()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.entries)) {
+            state = {
+              isDemo: false,
+              startWeight: parsed.startWeight || null,
+              goalWeight: parsed.goalWeight || null,
+              entries: parsed.entries || [],
+              bodyEntries: parsed.bodyEntries || []
+            };
+            saveState();
+            renderAll();
+            alert('Данные успешно загружены!');
+          } else {
+            alert('Неверный формат файла.');
+          }
+        } catch (err) {
+          alert('Ошибка при чтении файла.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    init();
+  </script>
+</body>
+</html>
