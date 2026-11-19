@@ -158,6 +158,7 @@
       align-items: center;
       margin-bottom: 12px;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .card-title {
@@ -222,6 +223,47 @@
 
     .stat-box.violet-hl .stat-val {
       color: var(--violet);
+    }
+
+    /* Компактная сетка 4x2 для итогов по 8 замерам тела */
+    .body-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .body-sum-item {
+      background: #f8fafc;
+      border: 1px solid #eef2f6;
+      border-radius: 10px;
+      padding: 7px 4px;
+      text-align: center;
+      min-width: 0;
+    }
+
+    .body-sum-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.2;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .body-sum-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .body-sum-sub {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 2px;
+      line-height: 1.1;
     }
 
     .progress-wrap {
@@ -323,24 +365,25 @@
       box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
     }
 
-    /* Переключатели периода на графике */
+    /* Переключатели периода и произвольный интервал дат на графике */
     .period-tabs {
       display: flex;
       background: #f1f5f9;
       padding: 3px;
       border-radius: 10px;
-      gap: 3px;
+      gap: 2px;
     }
 
     .period-tab {
       border: none;
       background: transparent;
-      padding: 5px 8px;
+      padding: 5px 7px;
       border-radius: 8px;
       font-size: 11px;
       font-weight: 700;
       color: var(--muted);
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .period-tab.active {
@@ -349,11 +392,45 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
 
+    .custom-range-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      background: #f8fafc;
+      padding: 6px 8px;
+      border-radius: 11px;
+      border: 1px solid #eef2f6;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .custom-range-bar input[type="date"] {
+      padding: 5px 6px;
+      font-size: 11px;
+      border-radius: 8px;
+      border-width: 1px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .range-reset-btn {
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      border-radius: 7px;
+      padding: 5px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     .chart-box {
       width: 100%;
       height: 215px;
       position: relative;
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
     canvas {
@@ -475,7 +552,7 @@
       line-height: 1.4;
     }
 
-    /* Таблица замеров тела */
+    /* Таблица замеров тела со закреплением 1-го и 2-го (начального) столбцов */
     .measure-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -492,7 +569,8 @@
 
     table.m-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       font-size: 12px;
       background: #fff;
     }
@@ -520,12 +598,29 @@
       background: #fff;
       font-weight: 700;
       color: #0f172a;
-      z-index: 1;
-      border-right: 1px solid #f1f5f9;
+      z-index: 2;
+      border-right: 1px solid #e2e8f0;
     }
 
     table.m-table th:first-child {
       background: #f8fafc;
+      z-index: 3;
+    }
+
+    table.m-table td.sticky-start,
+    table.m-table th.sticky-start {
+      position: sticky;
+      left: 96px;
+      z-index: 2;
+      background: #f0fdf4;
+      border-right: 2px solid #bbf7d0;
+      box-shadow: 3px 0 6px -2px rgba(15, 23, 42, 0.08);
+    }
+
+    table.m-table th.sticky-start {
+      background: #dcfce7;
+      color: #166534;
+      z-index: 3;
     }
 
     .metric-select {
@@ -675,9 +770,19 @@
           <div class="period-tabs">
             <button class="period-tab active" onclick="setPeriod(14, this)">14 дн</button>
             <button class="period-tab" onclick="setPeriod(30, this)">30 дн</button>
+            <button class="period-tab" onclick="setPeriod(365, this)">Год</button>
             <button class="period-tab" onclick="setPeriod(0, this)">Всё</button>
           </div>
         </div>
+
+        <div class="custom-range-bar">
+          <span>Период:</span>
+          <input type="date" id="rangeFrom" onchange="onCustomRangeChange()" title="Дата начала">
+          <span>—</span>
+          <input type="date" id="rangeTo" onchange="onCustomRangeChange()" title="Дата окончания">
+          <button type="button" class="range-reset-btn" onclick="resetCustomRange()" title="Сбросить период">Сброс</button>
+        </div>
+
         <div class="chart-box">
           <canvas id="weightChart"></canvas>
         </div>
@@ -699,25 +804,12 @@
 
     <!-- ==================== ВКЛАДКА 2: ЗАМЕРЫ ТЕЛА ==================== -->
     <div id="tab-body" class="tab-pane">
-      <!-- Сводка по объёмам -->
+      <!-- Сводка по всем 8 объёмам (2 ряда по 4) -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">✨ Итог по объёмам (см)</h2>
         </div>
-        <div class="stats-grid" style="margin-bottom:0;">
-          <div class="stat-box">
-            <div class="stat-label">Талия (изм.)</div>
-            <div class="stat-val" id="waistDeltaDisp">—</div>
-          </div>
-          <div class="stat-box violet-hl">
-            <div class="stat-label">Всего ушло</div>
-            <div class="stat-val" id="totalCmDeltaDisp">—</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Бёдра (изм.)</div>
-            <div class="stat-val" id="hipsDeltaDisp">—</div>
-          </div>
-        </div>
+        <div class="body-summary-grid" id="bodySummaryGrid"></div>
       </div>
 
       <!-- Форма ввода замеров тела -->
@@ -798,15 +890,16 @@
 
   <script>
     const STORAGE_KEY = 'weight_and_body_tracker_v2';
+    // Порядок строго: 1-й ряд — Грудь, Талия, Живот, Бёдра; 2-й ряд — Руки (Л/П), Ноги (Л/П)
     const BODY_FIELDS = [
-      { key: 'chest', label: 'Объём груди' },
-      { key: 'waist', label: 'Объём талии' },
-      { key: 'abdomen', label: 'Объём живота' },
-      { key: 'hips', label: 'Объём бёдер' },
-      { key: 'armL', label: 'Левая рука' },
-      { key: 'armR', label: 'Правая рука' },
-      { key: 'thighL', label: 'Левое бедро' },
-      { key: 'thighR', label: 'Правое бедро' }
+      { key: 'chest', label: 'Грудь', short: 'Грудь' },
+      { key: 'waist', label: 'Талия', short: 'Талия' },
+      { key: 'abdomen', label: 'Живот', short: 'Живот' },
+      { key: 'hips', label: 'Бёдра', short: 'Бёдра' },
+      { key: 'armL', label: 'Левая рука', short: 'Л. рука' },
+      { key: 'armR', label: 'Правая рука', short: 'П. рука' },
+      { key: 'thighL', label: 'Левое бедро', short: 'Л. нога' },
+      { key: 'thighR', label: 'Правое бедро', short: 'П. нога' }
     ];
 
     let state = {
@@ -817,6 +910,8 @@
       bodyEntries: []
     };
     let currentPeriod = 14;
+    let customFrom = '';
+    let customTo = '';
 
     function getTodayStr(offsetDays = 0) {
       const d = new Date();
@@ -833,7 +928,6 @@
           if (!Array.isArray(state.bodyEntries)) state.bodyEntries = [];
         } catch (e) {}
       } else {
-        // Демо-данные для наглядности при первом открытии
         state = {
           isDemo: true,
           startWeight: 77.5,
@@ -963,8 +1057,33 @@
 
     function setPeriod(days, btn) {
       currentPeriod = days;
+      customFrom = '';
+      customTo = '';
+      document.getElementById('rangeFrom').value = '';
+      document.getElementById('rangeTo').value = '';
       document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      drawWeightChart();
+    }
+
+    function onCustomRangeChange() {
+      customFrom = document.getElementById('rangeFrom').value;
+      customTo = document.getElementById('rangeTo').value;
+      if (customFrom || customTo) {
+        currentPeriod = null;
+        document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+      }
+      drawWeightChart();
+    }
+
+    function resetCustomRange() {
+      customFrom = '';
+      customTo = '';
+      document.getElementById('rangeFrom').value = '';
+      document.getElementById('rangeTo').value = '';
+      currentPeriod = 14;
+      const tabs = document.querySelectorAll('.period-tab');
+      tabs.forEach((b, i) => b.classList.toggle('active', i === 0));
       drawWeightChart();
     }
 
@@ -1059,15 +1178,22 @@
       ctx.clearRect(0, 0, W, H);
 
       let data = [...state.entries];
-      if (currentPeriod > 0 && data.length > currentPeriod) {
-        data = data.slice(-currentPeriod);
+      if (customFrom || customTo) {
+        data = data.filter(d => {
+          if (customFrom && d.date < customFrom) return false;
+          if (customTo && d.date > customTo) return false;
+          return true;
+        });
+      } else if (currentPeriod > 0) {
+        const cutoff = getTodayStr(-currentPeriod);
+        data = data.filter(d => d.date >= cutoff);
       }
 
       if (data.length === 0) {
         ctx.fillStyle = '#94a3b8';
         ctx.font = '13px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Добавьте первый замер, чтобы увидеть график', W / 2, H / 2);
+        ctx.fillText('Нет записей за выбранный период', W / 2, H / 2);
         return;
       }
 
@@ -1232,51 +1358,57 @@
       renderBody();
     }
 
+    function getFirstNonNull(entries, key) {
+      for (const e of entries) {
+        if (e[key] != null) return e[key];
+      }
+      return null;
+    }
+
+    function getLastNonNull(entries, key) {
+      for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i][key] != null) return entries[i][key];
+      }
+      return null;
+    }
+
     function renderBody() {
       const entries = state.bodyEntries;
+      const summaryGrid = document.getElementById('bodySummaryGrid');
 
-      // Сводка сверху
-      if (entries.length >= 2) {
-        const first = entries[0];
-        const last = entries[entries.length - 1];
+      // Компактная сводка по всем 8 замерам (2 ряда по 4)
+      summaryGrid.innerHTML = BODY_FIELDS.map(f => {
+        const firstVal = getFirstNonNull(entries, f.key);
+        const lastVal = getLastNonNull(entries, f.key);
+        let diffHtml = '<div class="body-sum-sub" style="color:#94a3b8;">—</div>';
 
-        const formatDelta = (v1, v2) => {
-          if (v1 == null || v2 == null) return '—';
-          const d = Math.round((v2 - v1) * 10) / 10;
-          return (d > 0 ? '+' : '') + d.toFixed(1) + ' см';
-        };
-
-        document.getElementById('waistDeltaDisp').textContent = formatDelta(first.waist, last.waist);
-        document.getElementById('hipsDeltaDisp').textContent = formatDelta(first.hips, last.hips);
-
-        let sumDiff = 0;
-        let compared = 0;
-        BODY_FIELDS.forEach(f => {
-          if (first[f.key] != null && last[f.key] != null) {
-            sumDiff += (last[f.key] - first[f.key]);
-            compared++;
+        if (firstVal != null && lastVal != null) {
+          const sameEntry = entries.filter(e => e[f.key] != null).length === 1;
+          if (sameEntry) {
+            diffHtml = '<div class="body-sum-sub" style="color:#64748b;">старт</div>';
+          } else {
+            const d = Math.round((lastVal - firstVal) * 10) / 10;
+            const sign = d > 0 ? '+' : '';
+            const color = d < 0 ? '#15803d' : (d > 0 ? '#b91c1c' : '#475569');
+            diffHtml = `<div class="body-sum-sub" style="color:${color};">${sign}${d.toFixed(1)}</div>`;
           }
-        });
-        sumDiff = Math.round(sumDiff * 10) / 10;
-        document.getElementById('totalCmDeltaDisp').textContent =
-          compared > 0 ? ((sumDiff > 0 ? '+' : '') + sumDiff.toFixed(1) + ' см') : '—';
-      } else if (entries.length === 1) {
-        const only = entries[0];
-        document.getElementById('waistDeltaDisp').textContent = only.waist ? only.waist + ' см' : '—';
-        document.getElementById('hipsDeltaDisp').textContent = only.hips ? only.hips + ' см' : '—';
-        document.getElementById('totalCmDeltaDisp').textContent = '1 замер';
-      } else {
-        document.getElementById('waistDeltaDisp').textContent = '—';
-        document.getElementById('hipsDeltaDisp').textContent = '—';
-        document.getElementById('totalCmDeltaDisp').textContent = '—';
-      }
+        }
 
-      // Таблица сравнений по датам
+        return `
+          <div class="body-sum-item">
+            <div class="body-sum-label" title="${f.label}">${f.short}</div>
+            <div class="body-sum-val">${lastVal != null ? lastVal.toFixed(1) : '—'}</div>
+            ${diffHtml}
+          </div>
+        `;
+      }).join('');
+
+      // Таблица сравнений по датам с закреплёнными 1-м (параметр) и 2-м (начало) столбцами
       const wrap = document.getElementById('bodyTableWrap');
       if (!entries.length) {
         wrap.innerHTML = '<div class="empty-state">Пока нет ни одного замера тела.<br>Заполните объёмы выше раз в месяц, чтобы видеть динамику.</div>';
       } else {
-        let html = '<div class="table-scroll"><table class="m-table"><thead><tr><th>Параметр</th>';
+        let html = '<div class="table-scroll"><table class="m-table"><thead><tr><th>Параметр</th><th class="sticky-start">Старт</th>';
         entries.forEach(e => {
           html += `<th>${formatShortDate(e.date)}<br><span style="font-weight:400;font-size:10px;color:#64748b">${e.date.slice(0,4)}</span> <button onclick="deleteBodyEntry('${e.date}')" style="border:none;background:none;color:#ef4444;cursor:pointer;padding:0 2px;" title="Удалить">×</button></th>`;
         });
@@ -1286,15 +1418,15 @@
         html += '</tr></thead><tbody>';
 
         BODY_FIELDS.forEach(f => {
-          html += `<tr><td>${f.label}</td>`;
+          const startVal = getFirstNonNull(entries, f.key);
+          const lastVal = getLastNonNull(entries, f.key);
+          html += `<tr><td>${f.label}</td><td class="sticky-start">${startVal != null ? startVal.toFixed(1) : '—'}</td>`;
           entries.forEach(e => {
             html += `<td>${e[f.key] != null ? e[f.key].toFixed(1) : '—'}</td>`;
           });
           if (entries.length >= 2) {
-            const firstVal = entries[0][f.key];
-            const lastVal = entries[entries.length - 1][f.key];
-            if (firstVal != null && lastVal != null) {
-              const diff = Math.round((lastVal - firstVal) * 10) / 10;
+            if (startVal != null && lastVal != null) {
+              const diff = Math.round((lastVal - startVal) * 10) / 10;
               const cls = diff < 0 ? 'diff-down' : (diff > 0 ? 'diff-up' : 'diff-zero');
               const sign = diff > 0 ? '+' : '';
               html += `<td><span class="h-diff ${cls}">${sign}${diff.toFixed(1)}</span></td>`;
